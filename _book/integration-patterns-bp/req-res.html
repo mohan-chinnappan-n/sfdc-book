@@ -1,0 +1,355 @@
+
+<!DOCTYPE HTML>
+<html lang="" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Request and Reply · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.2">
+        
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    <link rel="prev" href="./" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.1.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    Integration  Patterns and Best Practices
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter active" data-level="1.1.1.1" data-path="req-res.html">
+            
+                <a href="req-res.html">
+            
+                    
+                    Request and Reply
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >Request and Reply</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="remote-process-invocation&#x2014;request-and-reply">Remote Process Invocation&#x2014;Request and Reply</h1>
+<p><img src="https://developer.salesforce.com/docs/resources/img/en-us/204.0?doc_id=dev_guides%2Fintegration_patterns%2Fimages%2Fremote_process_invocation_state.png&amp;folder=integration_patterns_and_practices" alt="Request Response"></p>
+<ul>
+<li>The user initiates an action on the Visualforce page (for example, clicks a button).</li>
+<li>The browser performs an HTTP POST that in turn performs an <strong>action</strong> on the corresponding Apex controller.</li>
+<li>The controller calls a previously-generated Apex Web service proxy class.</li>
+<li>The proxy class performs the actual call to the remote Web service.</li>
+<li>The <strong>response</strong> from the <strong>remote system</strong> is returned to the Apex controller, which then processes the response, updates any data in Salesforce as required, and re-renders the page.</li>
+</ul>
+<h3 id="idempotent">Idempotent</h3>
+<p><strong>Idempotent</strong> capabilities guarantee that <strong>repeated invocations</strong> are safe and will have no negative effect</p>
+<h3 id="note">Note</h3>
+<p>It&#x2019;s almost impossible to guarantee that Salesforce only makes the call once (especially if the call is triggered from a user interface event)</p>
+<h4 id="how-to-build-a-idempotent-receiver">How to build a Idempotent receiver:</h4>
+<p>The most typical method of building an <strong>idempotent receiver</strong> is for it to track duplicates based on unique message identifiers sent by the consumer. Apex Web service or REST calls should be <strong>customized to send a unique message ID</strong>.</p>
+<p>In addition, operations that create records in the <strong>remote system should always check for duplicates</strong> before inserting.</p>
+<p>If he record exists in the remote system, the record should be updated. In most systems, this is termed an upsert operation.</p>
+<h4 id="example">Example</h4>
+<p>A utility company uses Salesforce and has a separate system that contains <strong>customer billing information</strong>. They want to display the billing history for a customer account without having to store that data in Salesforce. They have an existing <strong>Web service</strong> that can return a <strong>list of bills and their details for a given account number</strong>, but cannot otherwise display this data in a browser.</p>
+<p>This requirement can be accomplished with the following:</p>
+<ul>
+<li>Salesforce consumes the billing history service WSDL from an Apex proxy class.</li>
+<li>Create a Visualforce page and custom controller to <strong>execute this Apex proxy class</strong> with the account number as the unique identifier.</li>
+<li>The custom controller then <strong>parses the return values from the Apex callout</strong> and the Visualforce page  subsequently renders the billing info to the user.</li>
+</ul>
+<p>This example demonstrates the following:</p>
+<ul>
+<li><p>The state of the customer is tracked with an account number stored on the Salesforce account object.</p>
+</li>
+<li><p>Subsequent processing of the reply message by the caller (SFDC).</p>
+</li>
+</ul>
+<h3 id="governor-limits">Governor Limits</h3>
+<p>Due to the multi-tenant nature of the Salesforce platform, there are limits to Apex callouts.</p>
+<ul>
+<li>Only <strong>10</strong> callouts can be made in a given <strong>execution context</strong></li>
+<li><p>A <strong>maximum of 60 seconds invocation time</strong> for a <strong>given callout</strong></p>
+<ul>
+<li><strong>120 seconds</strong> of invocation time for <strong>all callouts in a given execution context</strong></li>
+</ul>
+<p><progress value="60" max="120">Single callout</progress>  60s for single callout</p>
+<p><progress value="120" max="120">Single callout</progress> 120s for all callout in the context</p>
+</li>
+<li><p>A <strong>maximum message size of 3 MB</strong> for a given callout request or response</p>
+</li>
+</ul>
+<h3 id="timeliness">Timeliness</h3>
+<p>Timeliness is of significant importance in this pattern.</p>
+<p> In most cases:</p>
+<ul>
+<li>The request is typically invoked from the <strong>user interface</strong>, therefore, the process shouldn&apos;t keep the user waiting.</li>
+<li>Salesforce has a <strong>configurable timeout</strong> of up to <strong>60 seconds</strong> for calls from Apex.</li>
+<li>Completion of the remote process should be executed in a timely manner to conclude within the Salesforce timeout limit and/or within user expectations.</li>
+</ul>
+<h3 id="security">Security</h3>
+<p>Any call to a remote system must maintain :</p>
+<ul>
+<li>confidentiality</li>
+<li>integrity</li>
+<li><p>availability
+of the request.</p>
+<p>The following security considerations are specific to using Apex SOAP and HTTP calls in this pattern:</p>
+</li>
+<li><p><strong>One-way SSL</strong> is enabled by default, but <strong>two-way SSL</strong> is supported with both <strong>self-signed</strong> and <strong>CA-signed certificates</strong> to maintain authenticity of both the client and server.</p>
+</li>
+<li><p><strong><em>WS-Security is not currently supported by Salesforce.</em></strong></p>
+</li>
+<li><p>Where necessary, consider using <strong>one-way hashes or digital signatures</strong> using the Apex Crypto class methods to ensure <strong>request integrity</strong>.</p>
+</li>
+<li><p>Implement the appropriate <strong>firewall</strong> mechanisms to protect the remote system.</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Header One</th>
+<th style="text-align:left">Header Two</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Apex <strong>SOAP</strong> callouts</td>
+<td style="text-align:left">The endpoint must be capable of receiving a Web service call via HTTP. The endpoint must be accessible over the <strong>public Internet</strong> by Salesforce. Web service standards supported by Salesforce for Apex SOAP callouts are: <strong>WSDL 1.1,  SOAP 1.1,  WSI-Basic Profile 1.1 - HTTP </strong></td>
+</tr>
+<tr>
+<td style="text-align:left">Apex <strong>HTTP</strong> callouts</td>
+<td style="text-align:left">The endpoint must be capable of receiving HTTP calls. The endpoint must be accessible over the public Internet by Salesforce. Apex HTTP callouts can be used to call <strong>RESTful</strong> services using the standard <strong>GET, POST, PUT, and DELETE</strong> methods.</td>
+</tr>
+</tbody>
+</table>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="./" class="navigation navigation-prev navigation-unique" aria-label="Previous page: Integration  Patterns and Best Practices">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Request and Reply","level":"1.1.1.1","depth":3,"previous":{"title":"Integration  Patterns and Best Practices","level":"1.1.1","depth":2,"path":"integration-patterns-bp/index.md","ref":"./integration-patterns-bp/index.md","articles":[{"title":"Request and Reply","level":"1.1.1.1","depth":3,"path":"integration-patterns-bp/req-res.md","ref":"./integration-patterns-bp/req-res.md","articles":[]}]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["livereload"],"pluginsConfig":{"livereload":{},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"integration-patterns-bp/req-res.md","mtime":"2017-01-10T23:11:29.000Z","type":"markdown"},"gitbook":{"version":"3.2.2","time":"2017-01-10T22:08:35.358Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-livereload/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+
